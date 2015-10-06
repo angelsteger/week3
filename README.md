@@ -1,6 +1,8 @@
 # week3
 Hours to complete: 11-12
 
+![screenshot](week3.gif)
+
 Required stories completed:
 
 1. On dragging the message left...
