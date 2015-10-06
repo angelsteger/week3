@@ -9,6 +9,7 @@
 import UIKit
 
 class HomescreenViewController: UIViewController {
+    @IBOutlet weak var containerView: UIView!
     @IBOutlet weak var scrollView: UIScrollView!
     @IBOutlet weak var laterIcon: UIImageView!
     @IBOutlet weak var listIcon: UIImageView!
@@ -25,6 +26,8 @@ class HomescreenViewController: UIViewController {
     @IBOutlet weak var messageContainerView: UIView!
     // Actual message sitting in the container
     @IBOutlet weak var messageView: UIImageView!
+    //Holds the side menu
+    @IBOutlet weak var swipableMenuView: UIView!
     
     // Create placeholder variables so everything has a starting place
     var originalMessageCenter: CGPoint!
@@ -58,6 +61,11 @@ class HomescreenViewController: UIViewController {
         
         rescheduleOptionsContainerView.alpha = 0
         listContainerView.alpha = 0
+        
+        // Create screen edge gesture recognizer
+        //let edgeGesture = UIScreenEdgePanGestureRecognizer(target: self, action: "onEdgePan:")
+        //edgeGesture.edges = UIRectEdge.Left
+        //containerView.addGestureRecognizer(edgeGesture)
         
     }
     
@@ -203,9 +211,9 @@ class HomescreenViewController: UIViewController {
                     //self.archiveIcon.alpha = 0
                     self.messageView.center.x = 480
                     self.archiveIcon.center.x = self.messageView.center.x - 190
+                    self.laterIcon.alpha = 0
                 }, completion: { (Bool) -> Void in
                     UIView.animateWithDuration(0.3, animations: { () -> Void in
-                        self.messageContainerView.alpha = 0
                         self.feedView.center.y = self.feedView.center.y - 86
                         self.scrollView.contentSize = CGSize(width: 320, height: 1302)
                     })
@@ -219,9 +227,9 @@ class HomescreenViewController: UIViewController {
                     self.deleteIcon.alpha = 0
                     self.messageView.center.x = 480
                     self.deleteIcon.center.x = self.messageView.center.x - 190
+                    self.laterIcon.alpha = 0
                 }, completion: { (Bool) -> Void in
                     UIView.animateWithDuration(0.3, animations: { () -> Void in
-                        self.messageContainerView.alpha = 0
                         self.feedView.center.y = self.feedView.center.y - 86
                         self.scrollView.contentSize = CGSize(width: 320, height: 1302)
                     })
@@ -230,6 +238,25 @@ class HomescreenViewController: UIViewController {
             }
             print("Gesture ended at: \(point)")
         }
+        
+        // EDGE PAN GESTURE RECOGNIZER
+        //func onEdgePan(sender:UIScreenEdgePanGestureRecognizer) {
+            //var location = sender.locationInView(view)
+            //var translation = sender.translationInView(view)
+            
+            //PAN BEGAN - set the original center
+            //if sender.state == UIGestureRecognizerState.Began {
+                
+            //}
+            // PAN CHANGED - As the message is dragged, update the center to include the new translated distance
+            //else if sender.state == UIGestureRecognizerState.Changed {
+                
+            //}
+            //  PAN ENDED
+            //else if sender.state == UIGestureRecognizerState.Ended {
+                
+            //}
+            
     }
 
     /*
