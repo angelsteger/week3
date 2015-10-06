@@ -14,7 +14,13 @@ class HomescreenViewController: UIViewController {
     @IBOutlet weak var listIcon: UIImageView!
     @IBOutlet weak var archiveIcon: UIImageView!
     @IBOutlet weak var deleteIcon: UIImageView!
-    
+    //Holds the reschedule options
+    @IBOutlet weak var rescheduleOptionsContainerView: UIView!
+    @IBOutlet weak var rescheduleImage: UIImageView!
+    @IBOutlet weak var feedView: UIImageView!
+    //Holds list view options
+    @IBOutlet weak var listContainerView: UIView!
+    @IBOutlet weak var listView: UIImageView!
     // Holds the editable message
     @IBOutlet weak var messageContainerView: UIView!
     // Actual message sitting in the container
@@ -34,6 +40,7 @@ class HomescreenViewController: UIViewController {
         // Do any additional setup after loading the view.
         
         // Scroll View
+        scrollView.frame.size = view.bounds.size
         scrollView.contentSize = CGSize(width: 320, height: 1367)
         
         //Set initial values
@@ -49,6 +56,8 @@ class HomescreenViewController: UIViewController {
         originalArchiveIconCenter = archiveIcon.center
         originalDeleteIconCenter = deleteIcon.center
         
+        rescheduleOptionsContainerView.alpha = 0
+        listContainerView.alpha = 0
         
     }
     
@@ -56,6 +65,30 @@ class HomescreenViewController: UIViewController {
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
+    }
+    //Create button to dismiss reschedule options and hide message
+    @IBAction func onTapRescheduleOptions(sender: AnyObject) {
+        UIView.animateWithDuration(0.5) { () -> Void in
+            self.rescheduleOptionsContainerView.alpha = 0
+            self.rescheduleImage.alpha = 0
+            //on completion
+            //self.messageContainerView.alpha = 0
+            self.feedView.center.y = self.feedView.center.y - 86
+            self.scrollView.contentSize = CGSize(width: 320, height: 1302)
+        }
+        
+    }
+    //Create button to dismiss list options and hide message
+    @IBAction func onTapListOptions(sender: AnyObject) {
+        UIView.animateWithDuration(0.5) { () -> Void in
+            self.listContainerView.alpha = 0
+            self.listView.alpha = 0
+            //on completion
+            //self.messageContainerView.alpha = 0
+            self.feedView.center.y = self.feedView.center.y - 86
+            self.scrollView.contentSize = CGSize(width: 320, height: 1302)
+        }
+        
     }
     
     // Pan Gesture Recognizer
@@ -65,12 +98,12 @@ class HomescreenViewController: UIViewController {
         let velocity = sender.velocityInView(view)
         
         
-        //Begin panning, set the original center
+        //PAN BEGAN - set the original center
         if sender.state == UIGestureRecognizerState.Began {
             originalMessageCenter.x = messageView.center.x
             print("Gesture began at: \(point)")
             
-        //As the message is dragged, update the center to include the new translated distance
+        // PAN CHANGED - As the message is dragged, update the center to include the new translated distance
         } else if sender.state == UIGestureRecognizerState.Changed {
             messageView.center.x = CGFloat(originalMessageCenter.x + translation.x)
           
@@ -120,8 +153,81 @@ class HomescreenViewController: UIViewController {
             }
         }
         
-        
+        //  PAN ENDED
         else if sender.state == UIGestureRecognizerState.Ended {
+            //left short swipe of 60pts or fewer, later icon doesn't move
+            if (messageView.center.x < 160 && messageView.center.x > 100) {
+                UIView.animateWithDuration(0.5, animations: { () -> Void in
+                    self.messageView.center.x = 160
+                })
+                
+            }
+            //left swipe between 60 and 260pts, message should continue to reveal yellow background
+            else if (messageView.center.x < 100 && messageView.center.x > -100) {
+                UIView.animateWithDuration(0.5, animations: { () -> Void in
+                    self.messageView.center.x = -160
+                    self.laterIcon.alpha = 0
+                    self.laterIcon.center.x = self.messageView.center.x + 190
+                }, completion: { (Bool) -> Void in
+                    UIView.animateWithDuration(0.3, animations: { () -> Void in
+                        self.rescheduleOptionsContainerView.alpha = 1
+                        self.rescheduleImage.alpha = 1
+                    })
+                })
+                
+            }
+            //left swipe between 260 and 320pts, continue to reveal brown background, on animation completion show list options
+            else if (messageView.center.x < -100 && messageView.center.x > -160) {
+                UIView.animateWithDuration(0.5, animations: { () -> Void in
+                    self.listIcon.alpha = 0
+                    self.messageView.center.x = -160
+                    self.listIcon.center.x = self.messageView.center.x + 190
+                }, completion: { (Bool) -> Void in
+                    UIView.animateWithDuration(0.3, animations: { () -> Void in
+                        self.listContainerView.alpha = 1
+                        self.listView.alpha = 1
+                    })
+                })
+                
+            }
+            //right swipe of 60pts or fewer, archive icon doesn't move
+            else if (messageView.center.x > 160 && messageView.center.x < 220) {
+                UIView.animateWithDuration(0.5, animations: { () -> Void in
+                    self.messageView.center.x = 160
+                })
+                
+            }
+            //right swipe between 60pts and 260pts, message should continue to reveal green background
+            else if (messageView.center.x > 220 && messageView.center.x < 420) {
+                UIView.animateWithDuration(0.5, animations: { () -> Void in
+                    //self.archiveIcon.alpha = 0
+                    self.messageView.center.x = 480
+                    self.archiveIcon.center.x = self.messageView.center.x - 190
+                }, completion: { (Bool) -> Void in
+                    UIView.animateWithDuration(0.3, animations: { () -> Void in
+                        self.messageContainerView.alpha = 0
+                        self.feedView.center.y = self.feedView.center.y - 86
+                        self.scrollView.contentSize = CGSize(width: 320, height: 1302)
+                    })
+                    
+                })
+                
+            }
+            //right swipe between 260pts and 320pts, message should continue to reveal red background
+            else if (messageView.center.x > 420 && messageView.center.x < 480) {
+                UIView.animateWithDuration(0.5, animations: { () -> Void in
+                    self.deleteIcon.alpha = 0
+                    self.messageView.center.x = 480
+                    self.deleteIcon.center.x = self.messageView.center.x - 190
+                }, completion: { (Bool) -> Void in
+                    UIView.animateWithDuration(0.3, animations: { () -> Void in
+                        self.messageContainerView.alpha = 0
+                        self.feedView.center.y = self.feedView.center.y - 86
+                        self.scrollView.contentSize = CGSize(width: 320, height: 1302)
+                    })
+                })
+                
+            }
             print("Gesture ended at: \(point)")
         }
     }
